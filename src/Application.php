@@ -3,62 +3,62 @@
 namespace Hannan\ProductReview;
 
 use Hannan\ProductReview\Contracts\ApplicationContract;
+use Override;
 
 class Application extends Container implements ApplicationContract
 {
+    public static Application $instance;
 
-    #[\Override] public function bind($abstract, $concrete = null, $shared = false)
+    public function __construct()
     {
-        // TODO: Implement bind() method.
+
     }
 
-    #[\Override] public function singleton($abstract, $concrete = null)
+    public static function getInstance(): static
     {
-        // TODO: Implement singleton() method.
+        if (isset(static::$instance)) {
+            return static::$instance;
+        } else {
+            static::$instance = new static();
+            return static::$instance;
+        }
     }
 
-    #[\Override] public function make($abstract, $parameters = [])
+    #[Override] public function singleton($abstract, $concrete = null)
     {
-        // TODO: Implement make() method.
+        parent::singleton($abstract, $concrete);
     }
 
-    #[\Override] public function instance($abstract, $instance)
+    #[Override] public function make($abstract, $parameters = [])
     {
-        // TODO: Implement instance() method.
+        return parent::make($abstract, $parameters);
     }
 
-    #[\Override] public function get($id)
+    #[Override] public function flush()
     {
-        // TODO: Implement get() method.
+        unset($this->instances);
+        unset($this->aliases);
+        unset($this->bindings);
     }
 
-    #[\Override] public function has($id)
+    #[Override] public function has($id)
     {
-        // TODO: Implement has() method.
+        return parent::has($id);
     }
 
-    #[\Override] public function flush()
+
+    #[Override] public function get($id)
     {
-        // TODO: Implement flush() method.
+        return parent::get($id);
     }
 
-    #[\Override] public function offsetExists($key)
+    #[Override] public function bind($abstract, $concrete = null, $shared = false)
     {
-        // TODO: Implement offsetExists() method.
+        parent::bind($abstract, $concrete, $shared);
     }
 
-    #[\Override] public function offsetGet($key)
+    #[Override] public function instance($abstract, $instance)
     {
-        // TODO: Implement offsetGet() method.
-    }
-
-    #[\Override] public function offsetSet($key, $value)
-    {
-        // TODO: Implement offsetSet() method.
-    }
-
-    #[\Override] public function offsetUnset($key)
-    {
-        // TODO: Implement offsetUnset() method.
+        parent::instance($abstract, $instance);
     }
 }

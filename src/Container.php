@@ -2,37 +2,68 @@
 
 namespace Hannan\ProductReview;
 
+use Closure;
 use Hannan\ProductReview\Contracts\ContainerContract;
+use Override;
 
 class Container implements ContainerContract
 {
-    #[\Override] public function bind($abstract, $concrete = null, $shared = false)
+    public array $instances = [];
+
+    public array $aliases = [];
+    public array $bindings = [];
+
+    #[Override] public function bind($abstract, $concrete = null, $shared = false)
     {
-        // TODO: Implement bind() method.
+        $this->bindings[$abstract] = $concrete;
     }
 
-    #[\Override] public function singleton($abstract, $concrete = null)
+    #[Override] public function singleton($abstract, $concrete = null)
     {
-        // TODO: Implement singleton() method.
+        if ($concrete instanceof Closure) {
+            $this->instances[$abstract] = $concrete();
+        } else if (is_object($concrete)) {
+            $this->instances[$abstract] = $concrete;
+        } else {
+            $this->instances[$abstract] = new $concrete;
+        }
     }
 
-    #[\Override] public function make($abstract, array $parameters = [])
+    #[Override] public function make($abstract, array $parameters = [])
     {
-        // TODO: Implement make() method.
+        if (isset($this->instances[$abstract])) {
+            return $this->instances[$abstract];
+        }
+        if (isset($this->bindings[$abstract])) {
+            return new $this->bindings[$abstract];
+        }
+        return null;
     }
 
-    #[\Override] public function instance($abstract, $instance)
+    #[Override] public function instance($abstract, $instance)
     {
-        // TODO: Implement instance() method.
+        $this->instances[$abstract] = $instance;
     }
 
-    #[\Override] public function get($id)
+    #[Override] public function get($id)
     {
-        // TODO: Implement get() method.
+        if (isset($this->instances[$id])) {
+            return $this->instances[$id];
+        }
+        if (isset($this->bindings[$id])) {
+            return $this->bindings[$id];
+        }
+        return null;
     }
 
-    #[\Override] public function has($id)
+    #[Override] public function has($id)
     {
-        // TODO: Implement has() method.
+        if (isset($this->instances[$id])) {
+            return true;
+        }
+        if (isset($this->bindings[$id])) {
+            return true;
+        }
+        return false;
     }
 }
