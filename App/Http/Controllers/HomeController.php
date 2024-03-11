@@ -8,4 +8,9 @@ class HomeController
     {
         return 'Hello from HomeController Again';
     }
+
+    public function store()
+    {
+        return ['message' => 'success again'];
+    }
 }
