@@ -2,30 +2,49 @@
 
 namespace App\Http\Controllers;
 
-class ReviewController
+use App\Http\Controller;
+use Hannan\ProductReview\Request;
+use Hannan\ProductReview\Response;
+
+class ReviewController extends Controller
 {
     public function index()
     {
-        return 'Hello from ReviewController';
+        return ['reviews' => [
+            ['id' => 1, 'product_id' => 1, 'user_id' => 1, 'message' => 'good'],
+            ['id' => 2, 'product_id' => 1, 'user_id' => 2, 'message' => 'bad'],
+            ['id' => 3, 'product_id' => 2, 'user_id' => 1, 'message' => 'good'],
+            ['id' => 4, 'product_id' => 2, 'user_id' => 2, 'message' => 'bad'],
+        ]];
     }
 
-    public function store()
+    public function store($request)
     {
-        return ['message' => 'success'];
+        $errors = $this->validate($request, [
+            'product_id' => 'required',
+            'user_id' => 'required',
+            'message' => 'required|min:10|max:255',
+        ]);
+
+        if (!empty($errors)) {
+            return (new Response())->json(['errors' => $errors], 422);
+        }
+
+        return (new Response())->json(['message' => 'created', 'data' => $request->all()], 201);
     }
 
     public function show($id)
     {
-        return ['id' => $id];
+        return ['review' => ['id' => $id, 'product_id' => 1, 'user_id' => 1, 'message' => 'good']];
     }
 
-    public function update($id)
+    public function update($id, $request)
     {
-        return ['message' => 'success'];
+        return ['message' => 'update success', 'id' => $id, 'data' => $request->all()];
     }
 
-    public function destroy($id)
+    public function destroy($id, Request $request)
     {
-        return ['message' => 'success'];
+        return ['message' => 'delete success', 'id' => $id, 'data' => $request->all()];
     }
 }

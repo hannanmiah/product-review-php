@@ -11,4 +11,3 @@ Route::post('/reviews', 'ReviewController@store');
 Route::get('/reviews/{id}', 'ReviewController@show');
 Route::put('/reviews/{id}', 'ReviewController@update');
 Route::delete('/reviews/{id}', 'ReviewController@destroy');
-

@@ -9,9 +9,24 @@ class Application extends Container implements ApplicationContract
 {
     public static Application $instance;
 
-    public function __construct()
+    public function __construct(public string $basePath = __DIR__)
     {
+        $this->boot();
+    }
 
+    #[Override] public function boot(): void
+    {
+        $this->loadConfig();
+    }
+
+    private function loadConfig(): void
+    {
+        $this->instance('config', new Config());
+    }
+
+    #[Override] public function instance($abstract, $instance)
+    {
+        parent::instance($abstract, $instance);
     }
 
     public static function getInstance(): static
@@ -46,7 +61,6 @@ class Application extends Container implements ApplicationContract
         return parent::has($id);
     }
 
-
     #[Override] public function get($id)
     {
         return parent::get($id);
@@ -55,10 +69,5 @@ class Application extends Container implements ApplicationContract
     #[Override] public function bind($abstract, $concrete = null, $shared = false)
     {
         parent::bind($abstract, $concrete, $shared);
-    }
-
-    #[Override] public function instance($abstract, $instance)
-    {
-        parent::instance($abstract, $instance);
     }
 }

@@ -21,3 +21,11 @@ if (!function_exists('app')) {
         return Application::getInstance();
     }
 }
+
+// get config value
+if (!function_exists('config')) {
+    function config($key)
+    {
+        return app('config')->get($key);
+    }
+}

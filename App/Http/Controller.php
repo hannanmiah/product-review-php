@@ -2,7 +2,7 @@
 
 namespace App\Http;
 
-class Controller
+class Controller extends \Hannan\ProductReview\Controller
 {
 
 }

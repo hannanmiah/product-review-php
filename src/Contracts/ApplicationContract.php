@@ -4,6 +4,8 @@ namespace Hannan\ProductReview\Contracts;
 
 interface ApplicationContract
 {
+    public function boot();
+
     public function bind($abstract, $concrete = null, $shared = false);
 
     public function singleton($abstract, $concrete = null);
