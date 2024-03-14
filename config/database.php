@@ -9,5 +9,7 @@ return [
         'password' => Env::get('DB_PASSWORD', ''),
         'connection' => Env::get('DB_CONNECTION', 'mysql'),
         'host' => Env::get('DB_HOST', 'localhost'),
+        'port' => Env::get('DB_PORT', '3306'),
+        'database' => Env::get('DB_DATABASE', 'product_review'),
     ]
 ];

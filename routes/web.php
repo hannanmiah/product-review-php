@@ -3,7 +3,8 @@
 use Hannan\ProductReview\Facades\Route;
 
 Route::get('/', function () {
-    return ['hello' => 'world'];
+    $data = app('db')->select('SELECT * FROM reviews');
+    return ['data' => $data];
 });
 
 Route::get('/reviews', 'ReviewController@index');

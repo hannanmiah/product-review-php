@@ -1,5 +1,8 @@
 <?php
 
 test('example', function () {
-    expect(true)->toBeTrue();
+    // home endpoint test
+    $response = $this->get('/');
+    $response->assertStatus(200);
+    $response->assertJson(['hello' => 'world']);
 });
