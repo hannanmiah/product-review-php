@@ -8,7 +8,7 @@ use Override;
 
 class Config implements ArrayAccess
 {
-    public array $config;
+    protected array $config;
 
     public function __construct()
     {

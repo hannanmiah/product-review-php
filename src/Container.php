@@ -8,10 +8,25 @@ use Override;
 
 class Container implements ContainerContract
 {
+    protected static $instance;
     public array $instances = [];
 
     public array $aliases = [];
     public array $bindings = [];
+
+    public static function getInstance()
+    {
+        if (is_null(static::$instance)) {
+            static::$instance = new static;
+        }
+
+        return static::$instance;
+    }
+
+    protected static function setInstance(ContainerContract $container)
+    {
+        static::$instance = $container;
+    }
 
     #[Override] public function bind($abstract, $concrete = null, $shared = false)
     {
