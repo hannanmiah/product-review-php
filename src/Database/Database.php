@@ -30,16 +30,25 @@ class Database
     // Select data
     public function select(string $query): array
     {
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        try {
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $exception) {
+            echo "Select query error: " . $exception->getMessage();
+            return [];
+        }
     }
 
     // Execute query (insert, update, delete)
     public function executeQuery(string $query, array $params): bool
     {
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute($params);
-        return $stmt;
+        try {
+            $stmt = $this->conn->prepare($query);
+            return $stmt->execute($params);
+        } catch (PDOException $exception) {
+            echo "Query execution error: " . $exception->getMessage();
+            return false;
+        }
     }
 }
