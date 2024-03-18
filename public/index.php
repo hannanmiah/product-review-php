@@ -1,6 +1,6 @@
 <?php
 
-use Hannan\ProductReview\Kernel;
+use App\Http\Kernel;
 use Hannan\ProductReview\Request;
 
 require __DIR__ . '/../vendor/autoload.php';

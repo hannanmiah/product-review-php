@@ -4,28 +4,20 @@ namespace Hannan\ProductReview;
 
 use ArrayAccess;
 use Exception;
+use Hannan\ProductReview\Console\Artisan;
 use Hannan\ProductReview\Contracts\ApplicationContract;
+use Hannan\ProductReview\Database\Database;
+use Hannan\ProductReview\Database\Schema;
 use Override;
 
 class Application extends Container implements ApplicationContract, ArrayAccess
 {
     public function __construct(public string $basePath = __DIR__)
     {
-        $this->registerBaseBindings();
         $this->boot();
-    }
+        $this->registerBaseBindings();
+        $this->registerAliases();
 
-    private function registerBaseBindings(): void
-    {
-        static::setInstance($this);
-        $this->instance('app', $this);
-        $this->instance(Application::class, $this);
-        $this->instance(Container::class, $this);
-    }
-
-    #[Override] public function instance($abstract, $instance)
-    {
-        parent::instance($abstract, $instance);
     }
 
     #[Override] public function boot(): void
@@ -49,9 +41,41 @@ class Application extends Container implements ApplicationContract, ArrayAccess
         $this->instance('config', new Config());
     }
 
-    #[Override] public function singleton($abstract, $concrete = null)
+    #[Override] public function instance($abstract, $instance)
+    {
+        parent::instance($abstract, $instance);
+    }
+
+    private function registerBaseBindings(): void
+    {
+        static::setInstance($this);
+        $this->instance('app', $this);
+        $this->instance(Application::class, $this);
+        $this->instance(Container::class, $this);
+    }
+
+    private function registerAliases(): void
+    {
+        $this->singleton('router', fn() => new Router());
+        $this->singleton('db', fn() => new Database(
+            config('database.mysql.host'),
+            config('database.mysql.database'),
+            config('database.mysql.username'),
+            config('database.mysql.password')
+        ));
+
+        $this->singleton('schema', fn() => new Schema($this->get('db')));
+        $this->instance('artisan', new Artisan());
+    }
+
+    #[Override] public function singleton($abstract, $concrete = null): void
     {
         parent::singleton($abstract, $concrete);
+    }
+
+    #[Override] public function get($id)
+    {
+        return parent::get($id);
     }
 
     #[Override] public function make($abstract, $parameters = [])
@@ -84,11 +108,6 @@ class Application extends Container implements ApplicationContract, ArrayAccess
     #[Override] public function offsetGet(mixed $offset): mixed
     {
         return $this->get($offset);
-    }
-
-    #[Override] public function get($id)
-    {
-        return parent::get($id);
     }
 
     #[Override] public function offsetSet(mixed $offset, mixed $value): void

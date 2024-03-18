@@ -4,32 +4,39 @@ namespace Hannan\ProductReview\Console;
 
 use Exception;
 use Hannan\ProductReview\Application;
+use Hannan\ProductReview\Exceptions\CommandNotFoundException;
+use Override;
 
-class Kernel
+class Kernel implements KernelContract
 {
     public function __construct(public Application $app)
     {
     }
 
-    public function migrate()
+    #[Override]
+    public function handle(Input $input, Output $output): int
     {
-        echo "Migrating...\n";
-        try {
-            $migrationFiles = glob(__DIR__ . '/../../migrations/*.php');
-            sort($migrationFiles);
+        $artisan = $this->app->get('artisan');
 
-            foreach ($migrationFiles as $file) {
-                $migration = require $file;
-                // drop the table if it exists
-                $migration->down();
-                // create the table
-                $migration->up();
-            }
+        $command = $input->getCommand();
+
+        try {
+            $artisan->run($command);
+            return 0; // return 0 to indicate success
+        } catch (CommandNotFoundException $e) {
+            return 2; // return the exception code to indicate an error
         } catch (Exception $e) {
-            echo $e->getMessage() . "\n";
+            return 3; // return the exception code to indicate an error
         }
-        echo "Migration complete.\n";
     }
 
-    // Add more methods for other commands as needed
+    #[Override]
+    public function terminate(Input $input, int $status): void
+    {
+        echo match ($status) {
+            0 => "Command executed successfully.\n",
+            2 => "Command {$input->getCommand()} not found.\n",
+            default => "An error occurred while executing the {$input->getCommand()}: $status.\n",
+        };
+    }
 }

@@ -3,25 +3,14 @@
 
 require __DIR__ . '/vendor/autoload.php';
 
+use Hannan\ProductReview\Console\Input;
 use Hannan\ProductReview\Console\Kernel;
+use Hannan\ProductReview\Console\Output;
 
 $app = require_once __DIR__ . '/bootstrap/app.php';
 
 $kernel = $app->make(Kernel::class);
 
-$options = getopt("", ["command:"]);
+$status = $kernel->handle($input = new Input, new Output);
 
-$command = $options['command'] ?? null;
-
-$commands = [
-    'migrate' => function () use ($kernel) {
-        $kernel->migrate();
-    },
-    // Add more commands as needed
-];
-
-if (isset($commands[$command])) {
-    $commands[$command]();
-} else {
-    echo "Command '$command' not found.\n";
-}
+$kernel->terminate($input, $status);
