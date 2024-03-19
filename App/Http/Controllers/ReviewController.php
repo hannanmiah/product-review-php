@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controller;
+use Exception;
+use Hannan\ProductReview\Facades\DB;
 use Hannan\ProductReview\Request;
 use Hannan\ProductReview\Response;
 
@@ -23,14 +25,21 @@ class ReviewController extends Controller
         $errors = $this->validate($request, [
             'product_id' => 'required',
             'user_id' => 'required',
-            'message' => 'required|min:10|max:255',
+            'body' => 'required|min:10|max:255',
         ]);
 
         if (!empty($errors)) {
             return (new Response())->json(['errors' => $errors], 422);
         }
-
-        return (new Response())->json(['message' => 'created', 'data' => $request->all()], 201);
+        try {
+            $isInserted = DB::table('reviews')->insert($request->all());
+            if (!$isInserted) {
+                return (new Response())->json(['message' => 'failed'], 500);
+            }
+            return (new Response())->json(['message' => 'created', 'data' => $request->all()], 201);
+        } catch (Exception $e) {
+            return (new Response())->json(['errors' => $errors], 422);
+        }
     }
 
     public function show($id)

@@ -78,6 +78,11 @@ class Application extends Container implements ApplicationContract, ArrayAccess
         return parent::get($id);
     }
 
+    public function basePath(string $path = ''): string
+    {
+        return $this->basePath . ($path ? DIRECTORY_SEPARATOR . $path : $path);
+    }
+
     #[Override] public function make($abstract, $parameters = [])
     {
         return parent::make($abstract, $parameters);

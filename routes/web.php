@@ -4,7 +4,7 @@ use Hannan\ProductReview\Facades\DB;
 use Hannan\ProductReview\Facades\Route;
 
 Route::get('/', function () {
-    $data = DB::select("SELECT * FROM reviews");
+    $data = DB::table('reviews')->select(['id', 'product_id', 'body']);
     return ['data' => $data];
 });
 

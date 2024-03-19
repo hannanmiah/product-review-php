@@ -4,61 +4,82 @@ namespace Hannan\ProductReview\Database;
 
 class QueryBuilder
 {
-    protected $select = '*';
-    protected $from;
-    protected $where = [];
-    protected $orderBy;
-    protected $limit;
+    protected string $table;
+    protected ?int $limit = null;
+    protected array $select = [];
+    protected array $insert = [];
+    protected array $update = [];
+    protected array $delete = [];
+    protected array $where = [];
 
-    public function select(string $fields): self
+    public function __construct(string $table)
+    {
+        $this->table = $table;
+    }
+
+    public function select(array $fields): self
     {
         $this->select = $fields;
         return $this;
     }
 
-    public function from(string $table): self
+    public function insert(array $data): self
     {
-        $this->from = $table;
+        $this->insert = $data;
         return $this;
     }
 
-    public function where(string $field, string $operator, string $value): self
+    public function update(array $data): self
     {
-        $this->where[] = [$field, $operator, $value];
+        $this->update = $data;
         return $this;
     }
 
-    public function orderBy(string $field, string $direction = 'ASC'): self
+    public function delete(): self
     {
-        $this->orderBy = "$field $direction";
+        $this->delete = [];
         return $this;
     }
 
-    public function limit(int $limit): self
+    public function where(array $conditions): self
     {
-        $this->limit = $limit;
+        $this->where = $conditions;
         return $this;
     }
 
-    public function getQuery(): string
+    public function first(): self
     {
-        $query = "SELECT {$this->select} FROM {$this->from}";
+        $this->limit = 1;
+        return $this;
+    }
+
+    public function toSql(): string
+    {
+        // Build the SQL query based on the provided data
+        // This is a simplified example and may not cover all cases
+        if (!empty($this->select)) {
+            $fields = implode(',', $this->select);
+            $sql = "SELECT {$fields} FROM {$this->table}";
+        } elseif (!empty($this->insert)) {
+            $fields = implode(',', array_keys($this->insert));
+            $values = ':' . implode(', :', array_keys($this->insert));
+            $sql = "INSERT INTO {$this->table} ({$fields}) VALUES ({$values})";
+        } elseif (!empty($this->update)) {
+            $fields = array_keys($this->update);
+            $setPart = implode(' = ?, ', $fields) . ' = ?';
+            $sql = "UPDATE {$this->table} SET {$setPart}";
+        } elseif (empty($this->delete)) {
+            $sql = "DELETE FROM {$this->table}";
+        }
 
         if (!empty($this->where)) {
-            $whereClauses = array_map(function ($clause) {
-                return implode(' ', $clause);
-            }, $this->where);
-            $query .= ' WHERE ' . implode(' AND ', $whereClauses);
+            $wherePart = implode(' = ? AND ', array_keys($this->where)) . ' = ?';
+            $sql .= " WHERE {$wherePart}";
+        }
+        if (isset($this->limit)) {
+            $sql .= " LIMIT {$this->limit}";
         }
 
-        if ($this->orderBy) {
-            $query .= " ORDER BY {$this->orderBy}";
-        }
-
-        if ($this->limit) {
-            $query .= " LIMIT {$this->limit}";
-        }
-
-        return $query;
+        return $sql;
     }
 }

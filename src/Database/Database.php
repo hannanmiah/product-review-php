@@ -8,13 +8,13 @@ use PDOException;
 class Database
 {
     private $conn;
+    private $table;
 
     public function __construct(string $host, string $db_name, string $username, string $password)
     {
         $this->connect($host, $db_name, $username, $password);
     }
 
-    // Database connection
     private function connect(string $host, string $db_name, string $username, string $password): void
     {
         $this->conn = null;
@@ -27,28 +27,63 @@ class Database
         }
     }
 
-    // Select data
-    public function select(string $query): array
+    public function table(string $table): self
     {
-        try {
-            $stmt = $this->conn->prepare($query);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $exception) {
-            echo "Select query error: " . $exception->getMessage();
-            return [];
-        }
+        $this->table = $table;
+        return $this;
     }
 
-    // Execute query (insert, update, delete)
-    public function executeQuery(string $query, array $params): bool
+    public function first(array $conditions, array $fields = []): array
+    {
+        $queryBuilder = $this->query($this->table)->where($conditions);
+
+        if (!empty($fields)) {
+            $queryBuilder->select($fields);
+        }
+
+        $query = $queryBuilder->first()->toSql();
+        $result = $this->executeQuery($query, $conditions, true);
+        return $result[0] ?? [];
+    }
+
+    public function query(string $table): QueryBuilder
+    {
+        return new QueryBuilder($table);
+    }
+
+    public function select(array $fields): array
+    {
+        $query = $this->query($this->table)->select($fields)->toSql();
+        return $this->executeQuery($query, [], true);
+    }
+
+    public function executeQuery(string $query, array $params, bool $fetch = false): mixed
     {
         try {
             $stmt = $this->conn->prepare($query);
-            return $stmt->execute($params);
+            $stmt->execute($params);
+            return $fetch ? $stmt->fetchAll(PDO::FETCH_ASSOC) : $stmt->rowCount();
         } catch (PDOException $exception) {
             echo "Query execution error: " . $exception->getMessage();
             return false;
         }
+    }
+
+    public function insert(array $data): bool
+    {
+        $query = $this->query($this->table)->insert($data)->toSql();
+        return $this->executeQuery($query, $data);
+    }
+
+    public function update(array $data, array $conditions): bool
+    {
+        $query = $this->query($this->table)->update($data)->where($conditions)->toSql();
+        return $this->executeQuery($query, array_merge($data, $conditions));
+    }
+
+    public function delete(array $conditions): bool
+    {
+        $query = $this->query($this->table)->delete()->where($conditions)->toSql();
+        return $this->executeQuery($query, $conditions);
     }
 }
